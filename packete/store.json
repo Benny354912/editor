@@ -1,7 +1,7 @@
 [
     {
-        "name": "Moin-Paket",
-        "description": "Fügt ein Moin-Kommando und Menüseite hinzu.",
-        "url": "https://example.com/packages/greeting.js"
+        "name": "Vorschau im neuem Tab",
+        "description": "Ermoglicht es die Website in einem eigenem Tab anzuzeigen.",
+        "url": "https://benny354912.github.io/editor/packete/vorschau.js"
     }
 ]
