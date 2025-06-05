@@ -1,3 +1,5 @@
+clearConsole()
+
 registerConsoleCommand(
   "Vorschau im neuen Tab öffnen",
   ["vorschau", "preview", "öffne vorschau", "neuer tab"],
