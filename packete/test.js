@@ -1,7 +1,8 @@
-// Funktion, die den Alert anzeigt
-function showAlert() {
-    alert("Minecraft");
-}
-
-// Starte den Timer (5000 ms = 5 Sekunden)
-const intervalId = setInterval(showAlert, 5000);
+addMenuPage(
+  "mc",
+  "Minecraft",
+  `
+    <h3>Minecraft</h3>
+    <p>Eine Funktion die Minecraft Seite hier zeigt?</p>
+  `
+);
