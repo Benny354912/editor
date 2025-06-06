@@ -3,6 +3,7 @@
     "id": "mc-alert",
     "name": "MC Alert",
     "description": "Fügt eine Minecraft Test Alert hinzu",
+    "logoUrl": "https://img.icons8.com/?size=100&id=16462&format=png&color=000000",
     "scriptUrl": "https://benny354912.github.io/editor/packete/test.js"
   },
   {
