@@ -1,0 +1,1 @@
+alert("Minecraft Test verify");
