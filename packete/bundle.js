@@ -165,84 +165,90 @@ function updateFileUI() {
 }
 
 // Bundle erstellen
+// === bundle-page.js ===
+
+// ... (alle bisherigen Code-Blöcke bleiben unverändert)
+
+// Bundle erstellen
+
 domBundle.confirmBtn.addEventListener("click", () => {
-    const htmlName = domBundle.htmlSelect.value;
-    const cssNames = Array.from(domBundle.cssList.querySelectorAll("input:checked")).map(el => el.value);
-    const jsNames = Array.from(domBundle.jsList.querySelectorAll("input:checked")).map(el => el.value);
-    const htmlFile = bundleFiles.find(f => f.name === htmlName);
-    if (!htmlFile) return alert("Keine gültige HTML-Datei ausgewählt.");
-    let html = htmlFile.content;
+  const htmlName = domBundle.htmlSelect.value;
+  const cssNames = Array.from(domBundle.cssList.querySelectorAll("input:checked")).map(el => el.value);
+  const jsNames = Array.from(domBundle.jsList.querySelectorAll("input:checked")).map(el => el.value);
+  const htmlFile = bundleFiles.find(f => f.name === htmlName);
+  if (!htmlFile) return alert("Keine gültige HTML-Datei ausgewählt.");
+  let html = htmlFile.content;
 
-    const styleBlock = cssNames.map(name => {
-        const f = bundleFiles.find(x => x.name === name);
-        return f ? `<style>\n${f.content}\n</style>` : '';
-    }).join('');
+  const styleBlock = cssNames.map(name => {
+    const f = bundleFiles.find(x => x.name === name);
+  }).join('');
 
-    const scriptBlock = jsNames.map(name => {
-        const f = bundleFiles.find(x => x.name === name);
-        return f ? `<script>\n${f.content}\n</script>` : '';
-    }).join('');
+  const scriptBlock = jsNames.map(name => {
+    const f = bundleFiles.find(x => x.name === name);
+    return f ? `<script>\n${f.content}\n</script>` : '';
+  }).join('');
 
-    const hasHtml = /<html[^>]*>/i.test(html);
-    const hasHead = /<head>/i.test(html);
-    const hasBody = /<body[^>]*>/i.test(html);
+  const hasHtml = /<html[^>]*>/i.test(html);
+  const hasHead = /<head>/i.test(html);
+  const hasBody = /<body[^>]*>/i.test(html);
 
-    if (!hasHtml) {
-        html = styleBlock + html + scriptBlock;
+  if (!hasHtml) {
+    html = styleBlock + html + scriptBlock;
+  } else {
+    if (!hasHead) html = html.replace(/<html[^>]*>/i, m => `${m}<head></head>`);
+    if (hasHead) {
+      html = html.replace(/<\/head>/i, styleBlock + '</head>');
     } else {
-        if (!hasHead) html = html.replace(/<html[^>]*>/i, m => `${m}<head></head>`);
-        if (hasHead) {
-            html = html.replace(/<\/head>/i, styleBlock + '</head>');
-        } else {
-            html = styleBlock + html;
-        }
-
-        if (hasBody) {
-            html = html.replace(/<\/body>/i, scriptBlock + '</body>');
-        } else {
-            html = html.replace(/<\/html>/i, scriptBlock + '</html>');
-        }
+      html = styleBlock + html;
     }
 
-    const doDownload = document.getElementById("bundleExportDownload").checked;
-    const doProjectSave = document.getElementById("bundleExportProject").checked;
-    const defaultFileName = htmlName.replace(/\.(html?|htm)$/i, "_bundle.html");
+    if (hasBody) {
+      html = html.replace(/<\/body>/i, scriptBlock + '</body>');
+    } else {
+      html = html.replace(/<\/html>/i, scriptBlock + '</html>');
+    }
+  }
 
-    if (!doDownload && !doProjectSave) return alert("Bitte mindestens eine Exportoption wählen.");
+  const doDownload = document.getElementById("bundleExportDownload").checked;
+  const doProjectSave = document.getElementById("bundleExportProject").checked;
+  const defaultFileName = htmlName.replace(/\.(html?|htm)$/i, "_bundle.html");
 
-    if (doProjectSave) {
-        const selectedProject = domBundle.projectTarget.value;
-        if (!selectedProject) return alert("Kein Projektziel ausgewählt.");
+  if (!doDownload && !doProjectSave) return alert("Bitte mindestens eine Exportoption wählen.");
 
-        let fileName = prompt("Dateiname für das Bundle im Projekt:", defaultFileName);
-        if (!fileName || !fileName.trim()) return alert("Ungültiger Dateiname.");
+  if (doProjectSave) {
+    const selectedProject = domBundle.projectTarget.value;
+    if (!selectedProject) return alert("Kein Projektziel ausgewählt.");
 
-        const projectFiles = Storage.getFiles(selectedProject);
-        while (projectFiles.includes(fileName)) {
-            const overwrite = confirm(`Datei \"${fileName}\" existiert bereits. Überschreiben?`);
-            if (overwrite) break;
-            const newName = prompt("Bitte neuen Dateinamen eingeben:", fileName);
-            if (!newName || !newName.trim()) {
-                alert("Überschreiben wird durchgeführt.");
-                break;
-            }
-            fileName = newName;
-        }
+    let fileName = prompt("Dateiname für das Bundle im Projekt:", defaultFileName);
+    if (!fileName || !fileName.trim()) return alert("Ungültiger Dateiname.");
 
-        Storage.addFile(selectedProject, fileName);
-        Storage.setFileContent(selectedProject, fileName, html);
-        showAlert("Bundle im Projekt gespeichert.", "success");
-        renderAll();
+    const projectFiles = Storage.getFiles(selectedProject);
+    while (projectFiles.includes(fileName)) {
+      const overwrite = confirm(`Datei \"${fileName}\" existiert bereits. Überschreiben?`);
+      if (overwrite) break;
+      const newName = prompt("Bitte neuen Dateinamen eingeben:", fileName);
+      if (!newName || !newName.trim()) {
+        alert("Überschreiben wird durchgeführt.");
+        break;
+      }
+      fileName = newName;
     }
 
-    if (doDownload) {
-        const blob = new Blob([html], { type: "text/html" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = defaultFileName;
-        a.click();
-    }
+    Storage.addFile(selectedProject, fileName);
+    Storage.setFileContent(selectedProject, fileName, html);
+    showAlert("Bundle im Projekt gespeichert.", "success");
+    renderAll();
+  }
+
+  if (doDownload) {
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = defaultFileName;
+    a.click();
+  }
 });
+
 
 // Kommando registrieren
 CommandManager.registerCommand({
