@@ -10,6 +10,6 @@
     "id": "Export eine HTML",
     "name": "one-html",
     "description": "Diese Erweiterung fügt die Funktion hinzu, alle Seiten als nur ein HTML Datei zu exportieren.",
-    "scriptUrl": "https://benny354912.github.io/editor/packete/exportonehtml.js"
+    "scriptUrl": "https://benny354912.github.io/editor/packete/bundle.js"
   }
 ]
