@@ -7,9 +7,9 @@
     "scriptUrl": "https://benny354912.github.io/editor/packete/test.js"
   },
   {
-    "id": "No-ID",
-    "name": "Kein name",
-    "description": "beschreibung",
-    "scriptUrl": "https://cdn.example.com/exts/syntaxHighlighter.js"
+    "id": "Export eine HTML",
+    "name": "one-html",
+    "description": "Diese Erweiterung fügt die Funktion hinzu, alle Seiten als nur ein HTML Datei zu exportieren.",
+    "scriptUrl": "https://benny354912.github.io/editor/packete/exportonehtml.js"
   }
 ]
