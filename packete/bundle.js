@@ -165,133 +165,84 @@ function updateFileUI() {
 }
 
 // Bundle erstellen
-// === bundle-page.js ===
-
-// ... (alle bisherigen Code-Blöcke bleiben unverändert)
-
-// Bundle erstellen
-
 domBundle.confirmBtn.addEventListener("click", () => {
-  const htmlName = domBundle.htmlSelect.value;
-  const cssNames = Array.from(domBundle.cssList.querySelectorAll("input:checked")).map(el => el.value);
-  const jsNames = Array.from(domBundle.jsList.querySelectorAll("input:checked")).map(el => el.value);
-  const htmlFile = bundleFiles.find(f => f.name === htmlName);
-  if (!htmlFile) return alert("Keine gültige HTML-Datei ausgewählt.");
-  let html = htmlFile.content;
+    const htmlName = domBundle.htmlSelect.value;
+    const cssNames = Array.from(domBundle.cssList.querySelectorAll("input:checked")).map(el => el.value);
+    const jsNames = Array.from(domBundle.jsList.querySelectorAll("input:checked")).map(el => el.value);
+    const htmlFile = bundleFiles.find(f => f.name === htmlName);
+    if (!htmlFile) return alert("Keine gültige HTML-Datei ausgewählt.");
+    let html = htmlFile.content;
 
-  const styleBlock = cssNames.map(name => {
-    const f = bundleFiles.find(x => x.name === name);
-    return f ? `<style>
-    /* Card */
-    .card { background:#fff; padding:1.5rem; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
-    .bundle-wrapper { font-family:'Segoe UI',sans-serif; color:#333; }
-    h2 { font-size:1.6rem; margin-bottom:0.5rem; }
-    .description { font-size:0.9rem; color:#666; margin-bottom:1rem; }
-    .section { margin-bottom:1.5rem; }
-    .toggle-group label { margin-right:1.5rem; font-weight:500; }
+    const styleBlock = cssNames.map(name => {
+        const f = bundleFiles.find(x => x.name === name);
+        return f ? `<style>\n${f.content}\n</style>` : '';
+    }).join('');
 
-    /* Drop Zone */
-    .drop-zone { border:2px dashed #aaa; border-radius:6px; padding:1.2rem; text-align:center; background:#f9f9f9; transition:0.2s; cursor:pointer; }
-    .drop-zone.highlight { border-color:#5c9ded; background:#e6f0fe; }
-    .hint { font-size:0.8rem; color:#999; margin-top:0.5rem; }
+    const scriptBlock = jsNames.map(name => {
+        const f = bundleFiles.find(x => x.name === name);
+        return f ? `<script>\n${f.content}\n</script>` : '';
+    }).join('');
 
-    /* File Group */
-    .file-group h4 { font-size:1rem; margin-bottom:0.5rem; color:#444; }
-    .file-checkboxes { display: flex; flex-direction: column; gap:0.4rem; }
-    .file-checkboxes label {
-      display: flex;
-      align-items: center;
-      padding:0.5rem;
-      border:1px solid #e0e0e0;
-      border-radius:4px;
-      cursor:pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .file-checkboxes label:hover { background:#f5faff; border-color:#aaccee; }
-    .file-checkboxes input[type='checkbox'] {
-      margin-right:0.5rem;
-      width:1rem;
-      height:1rem;
-      accent-color:#5c9ded;
-    }
+    const hasHtml = /<html[^>]*>/i.test(html);
+    const hasHead = /<head>/i.test(html);
+    const hasBody = /<body[^>]*>/i.test(html);
 
-    /* Export Group */
-    .export-group label { margin-right:1rem; font-weight:500; }
-    .inline-block { display:inline-flex; align-items:center; }
-    select { margin-left:0.5rem; padding:0.3rem; border:1px solid #ccc; border-radius:4px; }
-
-    /* Button */
-    .btn.primary { background:#5c9ded; color:#fff; padding:0.6rem 1.2rem; border:none; border-radius:4px; font-size:1rem; cursor:pointer; }
-    .btn.primary:hover { background:#4a8ad4; }
-  </style>` : '';
-  }).join('');
-
-  const scriptBlock = jsNames.map(name => {
-    const f = bundleFiles.find(x => x.name === name);
-    return f ? `<script>\n${f.content}\n</script>` : '';
-  }).join('');
-
-  const hasHtml = /<html[^>]*>/i.test(html);
-  const hasHead = /<head>/i.test(html);
-  const hasBody = /<body[^>]*>/i.test(html);
-
-  if (!hasHtml) {
-    html = styleBlock + html + scriptBlock;
-  } else {
-    if (!hasHead) html = html.replace(/<html[^>]*>/i, m => `${m}<head></head>`);
-    if (hasHead) {
-      html = html.replace(/<\/head>/i, styleBlock + '</head>');
+    if (!hasHtml) {
+        html = styleBlock + html + scriptBlock;
     } else {
-      html = styleBlock + html;
+        if (!hasHead) html = html.replace(/<html[^>]*>/i, m => `${m}<head></head>`);
+        if (hasHead) {
+            html = html.replace(/<\/head>/i, styleBlock + '</head>');
+        } else {
+            html = styleBlock + html;
+        }
+
+        if (hasBody) {
+            html = html.replace(/<\/body>/i, scriptBlock + '</body>');
+        } else {
+            html = html.replace(/<\/html>/i, scriptBlock + '</html>');
+        }
     }
 
-    if (hasBody) {
-      html = html.replace(/<\/body>/i, scriptBlock + '</body>');
-    } else {
-      html = html.replace(/<\/html>/i, scriptBlock + '</html>');
+    const doDownload = document.getElementById("bundleExportDownload").checked;
+    const doProjectSave = document.getElementById("bundleExportProject").checked;
+    const defaultFileName = htmlName.replace(/\.(html?|htm)$/i, "_bundle.html");
+
+    if (!doDownload && !doProjectSave) return alert("Bitte mindestens eine Exportoption wählen.");
+
+    if (doProjectSave) {
+        const selectedProject = domBundle.projectTarget.value;
+        if (!selectedProject) return alert("Kein Projektziel ausgewählt.");
+
+        let fileName = prompt("Dateiname für das Bundle im Projekt:", defaultFileName);
+        if (!fileName || !fileName.trim()) return alert("Ungültiger Dateiname.");
+
+        const projectFiles = Storage.getFiles(selectedProject);
+        while (projectFiles.includes(fileName)) {
+            const overwrite = confirm(`Datei \"${fileName}\" existiert bereits. Überschreiben?`);
+            if (overwrite) break;
+            const newName = prompt("Bitte neuen Dateinamen eingeben:", fileName);
+            if (!newName || !newName.trim()) {
+                alert("Überschreiben wird durchgeführt.");
+                break;
+            }
+            fileName = newName;
+        }
+
+        Storage.addFile(selectedProject, fileName);
+        Storage.setFileContent(selectedProject, fileName, html);
+        showAlert("Bundle im Projekt gespeichert.", "success");
+        renderAll();
     }
-  }
 
-  const doDownload = document.getElementById("bundleExportDownload").checked;
-  const doProjectSave = document.getElementById("bundleExportProject").checked;
-  const defaultFileName = htmlName.replace(/\.(html?|htm)$/i, "_bundle.html");
-
-  if (!doDownload && !doProjectSave) return alert("Bitte mindestens eine Exportoption wählen.");
-
-  if (doProjectSave) {
-    const selectedProject = domBundle.projectTarget.value;
-    if (!selectedProject) return alert("Kein Projektziel ausgewählt.");
-
-    let fileName = prompt("Dateiname für das Bundle im Projekt:", defaultFileName);
-    if (!fileName || !fileName.trim()) return alert("Ungültiger Dateiname.");
-
-    const projectFiles = Storage.getFiles(selectedProject);
-    while (projectFiles.includes(fileName)) {
-      const overwrite = confirm(`Datei \"${fileName}\" existiert bereits. Überschreiben?`);
-      if (overwrite) break;
-      const newName = prompt("Bitte neuen Dateinamen eingeben:", fileName);
-      if (!newName || !newName.trim()) {
-        alert("Überschreiben wird durchgeführt.");
-        break;
-      }
-      fileName = newName;
+    if (doDownload) {
+        const blob = new Blob([html], { type: "text/html" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = defaultFileName;
+        a.click();
     }
-
-    Storage.addFile(selectedProject, fileName);
-    Storage.setFileContent(selectedProject, fileName, html);
-    showAlert("Bundle im Projekt gespeichert.", "success");
-    renderAll();
-  }
-
-  if (doDownload) {
-    const blob = new Blob([html], { type: "text/html" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = defaultFileName;
-    a.click();
-  }
 });
-
 
 // Kommando registrieren
 CommandManager.registerCommand({
