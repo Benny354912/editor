@@ -2,15 +2,15 @@
 
 const originalToggle = dom.menuToggle.onclick;
 dom.menuToggle.onclick = () => {
-    initBundlePage();
-    originalToggle();
+  initBundlePage();
+  originalToggle();
 };
 
 function initBundlePage() {
-    populateProjectSelect();
-    // Reset Source View
-    document.querySelector('input[name="bundleSource"][value="upload"]').checked = true;
-    updateSourceView();
+  populateProjectSelect();
+  // Reset Source View
+  document.querySelector('input[name="bundleSource"][value="upload"]').checked = true;
+  updateSourceView();
 }
 
 // Neue Seite im Modal-Menü
@@ -84,68 +84,68 @@ addMenuPage("bundleTab", "Bundler", `
 `);
 
 const domBundle = {
-    dropZone: document.getElementById("bundleDropZone"),
-    uploadInput: document.getElementById("bundleUploadInput"),
-    projectSelect: document.getElementById("bundleProjectSelect"),
-    htmlSelect: document.getElementById("bundleHtmlFile"),
-    cssList: document.getElementById("bundleCssList"),
-    jsList: document.getElementById("bundleJsList"),
-    confirmBtn: document.getElementById("bundleConfirmBtn"),
-    projectTarget: document.getElementById("bundleProjectTarget"),
-    projectTargetWrap: document.getElementById("bundleProjectTargetWrap"),
-    uploadSection: document.getElementById("bundleUploadSection"),
-    projectSection: document.getElementById("bundleProjectSection"),
-    filesSection: document.getElementById("bundleFilesSection"),
+  dropZone: document.getElementById("bundleDropZone"),
+  uploadInput: document.getElementById("bundleUploadInput"),
+  projectSelect: document.getElementById("bundleProjectSelect"),
+  htmlSelect: document.getElementById("bundleHtmlFile"),
+  cssList: document.getElementById("bundleCssList"),
+  jsList: document.getElementById("bundleJsList"),
+  confirmBtn: document.getElementById("bundleConfirmBtn"),
+  projectTarget: document.getElementById("bundleProjectTarget"),
+  projectTargetWrap: document.getElementById("bundleProjectTargetWrap"),
+  uploadSection: document.getElementById("bundleUploadSection"),
+  projectSection: document.getElementById("bundleProjectSection"),
+  filesSection: document.getElementById("bundleFilesSection"),
 };
 
 let bundleFiles = [];
 
 // Quelle umschalten
 function updateSourceView() {
-    const src = document.querySelector("input[name=bundleSource]:checked").value;
-    const isUpload = src === "upload";
-    domBundle.uploadSection.classList.toggle("hidden", !isUpload);
-    domBundle.projectSection.classList.toggle("hidden", isUpload);
-    domBundle.filesSection.classList.add("hidden");
-    bundleFiles = [];
-    updateFileUI();
-    if (!isUpload) loadProjectFiles();
+  const src = document.querySelector("input[name=bundleSource]:checked").value;
+  const isUpload = src === "upload";
+  domBundle.uploadSection.classList.toggle("hidden", !isUpload);
+  domBundle.projectSection.classList.toggle("hidden", isUpload);
+  domBundle.filesSection.classList.add("hidden");
+  bundleFiles = [];
+  updateFileUI();
+  if (!isUpload) loadProjectFiles();
 }
 document.querySelectorAll("input[name=bundleSource]").forEach(r => r.addEventListener("change", updateSourceView));
 
 // Projekte befüllen
 function populateProjectSelect() {
-    const projs = Storage.getProjects();
-    domBundle.projectSelect.innerHTML = domBundle.projectTarget.innerHTML = '';
-    projs.forEach(p => {
-        const opt = new Option(p, p);
-        domBundle.projectSelect.append(opt.cloneNode(true));
-        domBundle.projectTarget.append(opt.cloneNode(true));
-    });
+  const projs = Storage.getProjects();
+  domBundle.projectSelect.innerHTML = domBundle.projectTarget.innerHTML = '';
+  projs.forEach(p => {
+    const opt = new Option(p, p);
+    domBundle.projectSelect.append(opt.cloneNode(true));
+    domBundle.projectTarget.append(opt.cloneNode(true));
+  });
 }
 populateProjectSelect();
 
 domBundle.projectSelect.addEventListener("change", loadProjectFiles);
 document.getElementById("bundleExportProject").addEventListener("change", e => {
-    domBundle.projectTargetWrap.classList.toggle("hidden", !e.target.checked);
+  domBundle.projectTargetWrap.classList.toggle("hidden", !e.target.checked);
 });
 
 // Projekt-Dateien laden
 function loadProjectFiles() {
-    const proj = domBundle.projectSelect.value;
-    bundleFiles = Storage.getFiles(proj)
-        .filter(f => /\.(html?|css|js)$/i.test(f))
-        .map(f => ({ name: f, content: Storage.getFileContent(proj, f) }));
-    domBundle.filesSection.classList.remove("hidden");
-    updateFileUI();
+  const proj = domBundle.projectSelect.value;
+  bundleFiles = Storage.getFiles(proj)
+    .filter(f => /\.(html?|css|js)$/i.test(f))
+    .map(f => ({ name: f, content: Storage.getFileContent(proj, f) }));
+  domBundle.filesSection.classList.remove("hidden");
+  updateFileUI();
 }
 
 // Upload behandeln
 function handleBundleUpload(files) {
-    const valid = Array.from(files).filter(f => /\.(html?|css|js)$/i.test(f.name));
-    Promise.all(valid.map(f => f.text().then(c => ({ name: f.name, content: c })))).then(res => {
-        bundleFiles = res; domBundle.filesSection.classList.remove("hidden"); updateFileUI();
-    });
+  const valid = Array.from(files).filter(f => /\.(html?|css|js)$/i.test(f.name));
+  Promise.all(valid.map(f => f.text().then(c => ({ name: f.name, content: c })))).then(res => {
+    bundleFiles = res; domBundle.filesSection.classList.remove("hidden"); updateFileUI();
+  });
 }
 
 domBundle.dropZone.addEventListener("click", () => domBundle.uploadInput.click());
@@ -156,12 +156,12 @@ domBundle.dropZone.addEventListener("drop", e => handleBundleUpload(e.dataTransf
 
 // UI aktualisieren
 function updateFileUI() {
-    const htmls = bundleFiles.filter(f => /\.(html?|htm)$/i.test(f.name));
-    const css = bundleFiles.filter(f => /\.css$/i.test(f.name));
-    const js = bundleFiles.filter(f => /\.js$/i.test(f.name));
-    domBundle.htmlSelect.innerHTML = htmls.map(f => `<option>${f.name}</option>`).join('');
-    domBundle.cssList.innerHTML = css.map(f => `<label><input type="checkbox" value="${f.name}" checked> ${f.name}</label>`).join('');
-    domBundle.jsList.innerHTML = js.map(f => `<label><input type="checkbox" value="${f.name}" checked> ${f.name}</label>`).join('');
+  const htmls = bundleFiles.filter(f => /\.(html?|htm)$/i.test(f.name));
+  const css = bundleFiles.filter(f => /\.css$/i.test(f.name));
+  const js = bundleFiles.filter(f => /\.js$/i.test(f.name));
+  domBundle.htmlSelect.innerHTML = htmls.map(f => `<option>${f.name}</option>`).join('');
+  domBundle.cssList.innerHTML = css.map(f => `<label><input type="checkbox" value="${f.name}" checked> ${f.name}</label>`).join('');
+  domBundle.jsList.innerHTML = js.map(f => `<label><input type="checkbox" value="${f.name}" checked> ${f.name}</label>`).join('');
 }
 
 // Bundle erstellen
@@ -181,6 +181,7 @@ domBundle.confirmBtn.addEventListener("click", () => {
 
   const styleBlock = cssNames.map(name => {
     const f = bundleFiles.find(x => x.name === name);
+    return f ? `<style>\n${f.content}\n</style>` : '';
   }).join('');
 
   const scriptBlock = jsNames.map(name => {
@@ -252,10 +253,9 @@ domBundle.confirmBtn.addEventListener("click", () => {
 
 // Kommando registrieren
 CommandManager.registerCommand({
-    triggers: ['bundle'], args: { required: false }, description: 'Bundler öffnen', callback: () => {
-        initBundlePage();
-        dom.menuModal.classList.remove('hidden');
-        document.querySelector('.modal-nav-item[data-tab="bundleTab"]').click();
-    }
+  triggers: ['bundle'], args: { required: false }, description: 'Bundler öffnen', callback: () => {
+    initBundlePage();
+    dom.menuModal.classList.remove('hidden');
+    document.querySelector('.modal-nav-item[data-tab="bundleTab"]').click();
+  }
 });
-
